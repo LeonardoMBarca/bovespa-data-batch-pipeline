@@ -1,7 +1,7 @@
 resource "aws_iam_role" "daily_lambda_bovespa_role" {
   count = var.create_new_role_daily_lambda_bovespa ? 1 : 0
 
-  name = "lambda_s3_full_access_role"
+  name = "lambda-s3-full-access-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -20,7 +20,7 @@ resource "aws_iam_role" "daily_lambda_bovespa_role" {
 resource "aws_iam_role_policy" "daily_lambda_bovespa_policy" {
   count = var.create_new_role_daily_lambda_bovespa ? 1 : 0
 
-  name = "daily_lambda_bovespa_policy"
+  name = "daily-lambda-bovespa-policy"
   role = aws_iam_role.daily_lambda_bovespa_role[0].id
 
   policy = jsonencode({
@@ -58,7 +58,7 @@ resource "aws_iam_role_policy" "daily_lambda_bovespa_policy" {
 resource "aws_iam_role" "lambda_glue_activation_role" {
   count = var.create_new_role_lambda_glue_activation ? 1 : 0
 
-  name = "lambda_glue_activation_role"
+  name = "lambda-glue-activation-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -77,7 +77,7 @@ resource "aws_iam_role" "lambda_glue_activation_role" {
 resource "aws_iam_role_policy" "lambda_glue_activation_policy" {
   count = var.create_new_role_lambda_glue_activation ? 1 : 0
 
-  name = "lambda_glue_activation_policy"
+  name = "lambda-glue-activation-policy"
   role = aws_iam_role.lambda_glue_activation_role[0].id
 
   policy = jsonencode({

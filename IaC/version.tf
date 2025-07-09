@@ -9,7 +9,7 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "terraform-state-bucket-bovespa"
+    bucket = "terraform-state-bucket-bovespa-199246429486" # Altere para seu state bucket com o número da sua conta AWS
     key    = "infra/tfstate_file.tfstate"
     region = "us-east-1"
   }

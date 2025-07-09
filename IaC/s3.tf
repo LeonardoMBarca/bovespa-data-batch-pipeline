@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "s3_datalake_bucket" {
-  bucket = "datalake-pregao-bovespa"
+  bucket = "datalake-pregao-bovespa-${data.aws_caller_identity.current.account_id}"
 }
 
 resource "aws_s3_bucket_notification" "s3_trigger_lambda" {
