@@ -1,6 +1,7 @@
 env_vars.sh
 .terraform/
-.zip
+daily-lambda-bovespa.zip
+lambda-glue-activation.zip
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
