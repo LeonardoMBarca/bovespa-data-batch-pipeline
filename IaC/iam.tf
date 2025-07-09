@@ -99,7 +99,84 @@ resource "aws_iam_role_policy" "lambda_glue_activation_policy" {
         Action = [
           "glue:StartJobRun"
         ]
-        Resource = "arn:aws:glue:*:${data.aws_caller_identity.current.account_id}:job/NOME_DO_JOB"
+        Resource = "arn:aws:glue:*:${data.aws_caller_identity.current.account_id}:job/${var.create_new_glue_job ? aws_glue_job.glue_bovespa_processing[0].id : var.name_glue_job}"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "glue_job_role" {
+  count = var.create_new_role_glue_job ? 1 : 0
+
+  name = "glue-s3-catalog-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect = "Allow",
+        Principal = {
+          Service = "glue.amazonaws.com"
+        },
+        Action = "sts:AssumeRole"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "glue_job_policy" {
+  count = var.create_new_role_glue_job ? 1 : 0
+
+  name = "glue-s3-catalog-policy"
+  role = aws_iam_role.glue_job_role[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid: "GlueLogs",
+        Effect: "Allow",
+        Action: [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource: "arn:aws:logs:*:*:*"
+      },
+      {
+        Sid: "S3AccessRawAndRefined",
+        Effect: "Allow",
+        Action: [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:DeleteObject",
+          "s3:ListBucket",
+          "s3:GetBucketLocation"
+        ],
+        Resource: [
+          "arn:aws:s3:::${aws_s3_bucket.s3_datalake_bucket.bucket}",
+          "arn:aws:s3:::${aws_s3_bucket.s3_datalake_bucket.bucket}/raw/*",
+          "arn:aws:s3:::${aws_s3_bucket.s3_datalake_bucket.bucket}/refined/*"
+        ]
+      },
+      {
+        Sid: "GlueDataCatalogAccess",
+        Effect: "Allow",
+        Action: [
+          "glue:GetDatabase",
+          "glue:GetDatabases",
+          "glue:GetTable",
+          "glue:GetTables",
+          "glue:CreateTable",
+          "glue:UpdateTable",
+          "glue:DeleteTable",
+          "glue:GetPartition",
+          "glue:GetPartitions",
+          "glue:CreatePartition",
+          "glue:UpdatePartition",
+          "glue:DeletePartition"
+        ],
+        Resource: "*"
       }
     ]
   })

@@ -14,6 +14,7 @@
 | **S3** | `datalake-pregao-bovespa` | Armazenamento dos dados coletados |
 | **Lambda** | `daily-lambda-bovespa` | Coleta diária de dados (12:00 UTC) |
 | **Lambda** | `lambda-glue-activation` | Ativação automática do job Glue |
+| **Glue** | `glue-bovespa-processing` | Job para transformação de dados |
 | **CloudWatch** | Events Rule | Agendamento da execução diária |
 | **IAM** | Roles específicas | Permissões para cada Lambda |
 

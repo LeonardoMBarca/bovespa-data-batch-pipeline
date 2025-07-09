@@ -24,6 +24,12 @@ resource "aws_lambda_function" "lambda_glue_activation" {
 
   filename         = data.archive_file.lambda_glue_activation_scripts.output_path
   source_code_hash = data.archive_file.lambda_glue_activation_scripts.output_base64sha256
+
+  environment {
+    variables = {
+      JOB_NAME = var.create_new_glue_job ? aws_glue_job.glue_bovespa_processing[0].id : var.name_glue_job
+    }
+  }
 }
 
 resource "aws_lambda_permission" "glue_lambda_allow_s3" {
