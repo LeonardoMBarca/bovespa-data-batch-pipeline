@@ -2,7 +2,7 @@ resource "aws_glue_job" "glue_bovespa_processing" {
   count              = var.create_new_glue_job ? 1 : 0
 
   name              = "glue-bovespa-data-processing"
-  role_arn          = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.create_new_role_glue_job == true ? aws_iam_role.glue_job_role[0].name : var.name_glue_job_role}"
+  role_arn          = "arn:aws:iam::${var.account_id}:role/${var.create_new_role_glue_job == true ? var.glue_job_role_name : var.name_glue_job_role}"
   glue_version      = "5.0"
   max_retries       = 0
   timeout           = 2880
@@ -11,15 +11,15 @@ resource "aws_glue_job" "glue_bovespa_processing" {
   execution_class   = "STANDARD"
 
   command {
-    script_location = var.create_new_role_glue_job ? "s3://${aws_s3_bucket.s3_glue_script_bucket[0].id}/glue_script.py" : "s3://glue-script-${data.aws_caller_identity.current.account_id}/glue_script.py"
+    script_location = var.create_new_role_glue_job ? "s3://${var.s3_glue_script_bucket_id}/glue_script.py" : "s3://glue-script-${var.account_id}/glue_script.py"
     name            = "glueetl"
     python_version  = "3.9"
   }
 
   default_arguments = {
-    "--TempDir" = var.create_new_role_glue_job ? "s3://${aws_s3_bucket.s3_glue_script_bucket[0].id}/glue-temp-dir/" : "s3://glue-script-${data.aws_caller_identity.current.account_id}/glue-temp-dir/"
+    "--TempDir" = var.create_new_role_glue_job ? "s3://${var.s3_glue_script_bucket_id}/glue-temp-dir/" : "s3://glue-script-${var.account_id}/glue-temp-dir/"
     "--job-language" = "python"
-    "--BUCKET_NAME" = "${aws_s3_bucket.s3_datalake_bucket.id}"
+    "--BUCKET_NAME" = "${var.s3_datalake_bucket_id}"
     "--DATABASE_NAME" = aws_glue_catalog_database.refined_data.name
     "--enable-metrics" = "true"
     "--enable-continuous-cloudwatch-log" = "true"

@@ -1,6 +1,6 @@
 resource "aws_lambda_function" "daily_lambda_bovespa" {
   function_name = "daily-lambda-bovespa"
-  role          = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.create_new_role_daily_lambda_bovespa == true ? aws_iam_role.daily_lambda_bovespa_role[0].name : var.name_role_daily_lambda_bovespa}"
+  role          = "arn:aws:iam::${var.account_id}:role/${var.create_new_role_daily_lambda_bovespa == true ? var.daily_lambda_bovespa_role_name : var.name_role_daily_lambda_bovespa}"
   handler       = "main.handler"
   runtime       = "python3.9"
 
@@ -13,12 +13,12 @@ resource "aws_lambda_permission" "bovespa_lambda_allow_event" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.daily_lambda_bovespa.function_name
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.bovespa_event.arn
+  source_arn    = var.cloudwatch_event_rule_arn
 }
 
 resource "aws_lambda_function" "lambda_glue_activation" {
   function_name = "lambda-glue-activation"
-  role          = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/${var.create_new_role_lambda_glue_activation == true ? aws_iam_role.lambda_glue_activation_role[0].name : var.name_role_lambda_glue_activation}"
+  role          = "arn:aws:iam::${var.account_id}:role/${var.create_new_role_lambda_glue_activation == true ? var.lambda_glue_activation_role_name : var.name_role_lambda_glue_activation}"
   handler       = "main.handler"
   runtime       = "python3.9"
 
@@ -27,7 +27,7 @@ resource "aws_lambda_function" "lambda_glue_activation" {
 
   environment {
     variables = {
-      JOB_NAME = var.create_new_glue_job ? aws_glue_job.glue_bovespa_processing[0].id : var.name_glue_job
+      JOB_NAME = var.create_new_glue_job ? var.glue_job_name : var.name_glue_job
     }
   }
 }
@@ -37,5 +37,18 @@ resource "aws_lambda_permission" "glue_lambda_allow_s3" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_glue_activation.function_name
   principal     = "s3.amazonaws.com"
-  source_arn    = aws_s3_bucket.s3_datalake_bucket.arn
+  source_arn    = var.s3_datalake_bucket_arn
+}
+
+resource "aws_s3_bucket_notification" "s3_trigger_lambda" {
+  bucket = var.s3_datalake_bucket_name
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.lambda_glue_activation.arn
+    events              = ["s3:ObjectCreated:*"]
+    filter_prefix       = "raw/"
+    filter_suffix       = ".parquet"
+  }
+
+  depends_on = [aws_lambda_permission.glue_lambda_allow_s3]
 }

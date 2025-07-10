@@ -47,8 +47,8 @@ resource "aws_iam_role_policy" "daily_lambda_bovespa_policy" {
           "s3:GetBucketLocation"
         ]
         Resource = [
-          "arn:aws:s3:::${aws_s3_bucket.s3_datalake_bucket.bucket}",
-          "arn:aws:s3:::${aws_s3_bucket.s3_datalake_bucket.bucket}/*"
+          "arn:aws:s3:::${var.s3_datalake_bucket}",
+          "arn:aws:s3:::${var.s3_datalake_bucket}/*"
         ]
       }
     ]
@@ -99,7 +99,7 @@ resource "aws_iam_role_policy" "lambda_glue_activation_policy" {
         Action = [
           "glue:StartJobRun"
         ]
-        Resource = "arn:aws:glue:*:${data.aws_caller_identity.current.account_id}:job/${var.create_new_glue_job ? aws_glue_job.glue_bovespa_processing[0].id : var.name_glue_job}"
+        Resource = "arn:aws:glue:*:${var.account_id}:job/${var.create_new_glue_job ? var.glue_job_name : var.name_glue_job}"
       }
     ]
   })
@@ -154,9 +154,9 @@ resource "aws_iam_role_policy" "glue_job_policy" {
           "s3:GetBucketLocation"
         ],
         Resource: [
-          "arn:aws:s3:::${aws_s3_bucket.s3_datalake_bucket.bucket}",
-          "arn:aws:s3:::${aws_s3_bucket.s3_datalake_bucket.bucket}/raw/*",
-          "arn:aws:s3:::${aws_s3_bucket.s3_datalake_bucket.bucket}/refined/*"
+          "arn:aws:s3:::${var.s3_datalake_bucket}",
+          "arn:aws:s3:::${var.s3_datalake_bucket}/raw/*",
+          "arn:aws:s3:::${var.s3_datalake_bucket}/refined/*"
         ]
       },
       {

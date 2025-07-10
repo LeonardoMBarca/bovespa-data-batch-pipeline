@@ -6,17 +6,30 @@
 
 ## 🏗️ Arquitetura da Infraestrutura
 
+### 📁 Estrutura Modular
+
+```
+IaC/
+├── modules/
+│   ├── s3/          # Buckets S3 (state, datalake, scripts)
+│   ├── lambda/      # Funções Lambda (coleta e trigger)
+│   ├── glue/        # Job de processamento Glue
+│   ├── iam/         # Roles e políticas IAM
+│   └── cloudwatch/  # Agendamento de eventos
+├── main.tf          # Orquestração dos módulos
+├── variables.tf     # Variáveis globais
+└── version.tf       # Backend e providers
+```
+
 ### 🔧 Componentes AWS
 
-| Serviço | Recurso | Descrição |
-|---------|---------|-----------|
-| **S3** | `terraform-state-bucket-bovespa-{conta}` | Armazenamento do estado do Terraform |
-| **S3** | `datalake-pregao-bovespa` | Armazenamento dos dados coletados |
-| **Lambda** | `daily-lambda-bovespa` | Coleta diária de dados (12:00 UTC) |
-| **Lambda** | `lambda-glue-activation` | Ativação automática do job Glue |
-| **Glue** | `glue-bovespa-processing` | Job para transformação de dados |
-| **CloudWatch** | Events Rule | Agendamento da execução diária |
-| **IAM** | Roles específicas | Permissões para cada Lambda |
+| Módulo | Recursos | Descrição |
+|--------|----------|----------|
+| **S3** | State bucket, Datalake, Scripts | Armazenamento distribuído |
+| **Lambda** | Daily collector, Glue trigger | Funções serverless |
+| **Glue** | Processing job | Transformação de dados |
+| **CloudWatch** | Event rule | Agendamento (12:00 UTC) |
+| **IAM** | Service roles | Permissões granulares |
 
 ### 🔄 Fluxo de Dados
 
@@ -70,9 +83,7 @@ backend "s3" {
 
 ### 🛠️ Configuração de Variáveis
 
-Escolha **uma** das opções abaixo:
-
-#### Opção A: Arquivo terraform.tfvars (Recomendado)
+#### Arquivo terraform.tfvars (Recomendado)
 
 ```hcl
 # IaC/terraform.tfvars
@@ -80,45 +91,17 @@ create_new_role_daily_lambda_bovespa = true
 name_role_daily_lambda_bovespa = "daily-lambda-bovespa-role"
 create_new_role_lambda_glue_activation = true
 name_role_lambda_glue_activation = "lambda-glue-activation-role"
+create_new_glue_job = true
+name_glue_job = "glue-bovespa-processing"
+create_new_role_glue_job = true
+name_glue_job_role = "glue-bovespa-role"
 ```
 
-#### Opção B: Variáveis de Ambiente
+#### Variáveis de Ambiente (Alternativa)
 
-**🐧 Linux/Mac:**
 ```bash
-# env_vars.sh
-#!/bin/bash
-export TF_VAR_create_new_role_daily_lambda_bovespa="true"
-export TF_VAR_name_role_daily_lambda_bovespa="daily-lambda-bovespa-role"
-export TF_VAR_create_new_role_lambda_glue_activation="true"
-export TF_VAR_name_role_lambda_glue_activation="lambda-glue-activation-role"
-
-# Executar:
+# Use o arquivo env_vars.sh incluído no projeto
 source env_vars.sh
-```
-
-**🪟 Windows (CMD):**
-```batch
-REM env_vars.bat
-set TF_VAR_create_new_role_daily_lambda_bovespa=true
-set TF_VAR_name_role_daily_lambda_bovespa=daily-lambda-bovespa-role
-set TF_VAR_create_new_role_lambda_glue_activation=true
-set TF_VAR_name_role_lambda_glue_activation=lambda-glue-activation-role
-
-REM Executar:
-env_vars.bat
-```
-
-**💙 PowerShell:**
-```powershell
-# env_vars.ps1
-$env:TF_VAR_create_new_role_daily_lambda_bovespa="true"
-$env:TF_VAR_name_role_daily_lambda_bovespa="daily-lambda-bovespa-role"
-$env:TF_VAR_create_new_role_lambda_glue_activation="true"
-$env:TF_VAR_name_role_lambda_glue_activation="lambda-glue-activation-role"
-
-# Executar:
-.\env_vars.ps1
 ```
 
 ### 🚀 Deploy da Infraestrutura
