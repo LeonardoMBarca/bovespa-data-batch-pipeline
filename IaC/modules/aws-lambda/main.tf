@@ -27,6 +27,7 @@ resource "aws_lambda_function" "lambda_glue_activation" {
 
   environment {
     variables = {
+      BUCKET_NAME = var.s3_datalake_bucket_name
       JOB_NAME = var.create_new_glue_job ? var.glue_job_name : var.name_glue_job
     }
   }

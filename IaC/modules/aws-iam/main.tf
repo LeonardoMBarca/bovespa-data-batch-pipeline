@@ -134,35 +134,35 @@ resource "aws_iam_role_policy" "glue_job_policy" {
     Version = "2012-10-17",
     Statement = [
       {
-        Sid: "GlueLogs",
-        Effect: "Allow",
-        Action: [
+        Sid : "GlueLogs",
+        Effect : "Allow",
+        Action : [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
           "logs:PutLogEvents"
         ],
-        Resource: "arn:aws:logs:*:*:*"
+        Resource : "arn:aws:logs:*:*:*"
       },
       {
-        Sid: "S3AccessRawAndRefined",
-        Effect: "Allow",
-        Action: [
+        Sid : "S3AccessRawAndRefined",
+        Effect : "Allow",
+        Action : [
           "s3:GetObject",
           "s3:PutObject",
           "s3:DeleteObject",
           "s3:ListBucket",
           "s3:GetBucketLocation"
         ],
-        Resource: [
+        Resource : [
           "arn:aws:s3:::${var.s3_datalake_bucket}",
           "arn:aws:s3:::${var.s3_datalake_bucket}/raw/*",
           "arn:aws:s3:::${var.s3_datalake_bucket}/refined/*"
         ]
       },
       {
-        Sid: "GlueDataCatalogAccess",
-        Effect: "Allow",
-        Action: [
+        Sid : "GlueDataCatalogAccess",
+        Effect : "Allow",
+        Action : [
           "glue:GetDatabase",
           "glue:GetDatabases",
           "glue:GetTable",
@@ -176,7 +176,7 @@ resource "aws_iam_role_policy" "glue_job_policy" {
           "glue:UpdatePartition",
           "glue:DeletePartition"
         ],
-        Resource: "*"
+        Resource : "*"
       }
     ]
   })
