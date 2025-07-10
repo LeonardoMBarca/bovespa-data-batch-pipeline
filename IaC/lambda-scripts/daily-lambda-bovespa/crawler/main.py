@@ -1,0 +1,17 @@
+from scraper.downloader import download_base
+from scraper.upload import csv_to_parquet, upload_to_s3
+from config import DOWNLOAD_DIR
+from datetime import datetime
+import os
+
+def main():
+    download_base()
+    today = datetime.today().strftime("%Y-%m-%d")
+    csv_dir = os.path.join(DOWNLOAD_DIR, f"date={today}")
+    csv_path = os.path.join(csv_dir, "IBOV.csv")
+    parquet_path, pregao_date = csv_to_parquet(csv_path)
+    if parquet_path:
+        upload_to_s3(parquet_path, pregao_date)
+
+if __name__ == "__main__":
+    main()
