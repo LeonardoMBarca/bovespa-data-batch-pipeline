@@ -62,3 +62,13 @@ variable "s3_datalake_bucket_name" {
   description = "S3 Datalake Bucket name"
   type        = string
 }
+
+variable "s3_script_bucket_name" {
+  description = "S3 Script Bucket Name"
+  type = string
+}
+
+variable "s3_lambda_layer_object" {
+  description = "S3 Lambda Layer Object dependency"
+  type = any
+}

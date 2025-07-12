@@ -11,13 +11,13 @@ resource "aws_glue_job" "glue_bovespa_processing" {
   execution_class   = "STANDARD"
 
   command {
-    script_location = var.create_new_role_glue_job ? "s3://${var.s3_glue_script_bucket_id}/glue_script.py" : "s3://glue-script-${var.account_id}/glue_script.py"
+    script_location = var.create_new_role_glue_job ? "s3://${var.s3_script_bucket_id}/glue_script.py" : "s3://glue-script-${var.account_id}/glue_script.py"
     name            = "glueetl"
     python_version  = "3.9"
   }
 
   default_arguments = {
-    "--TempDir"                          = var.create_new_role_glue_job ? "s3://${var.s3_glue_script_bucket_id}/glue-temp-dir/" : "s3://glue-script-${var.account_id}/glue-temp-dir/"
+    "--TempDir"                          = var.create_new_role_glue_job ? "s3://${var.s3_script_bucket_id}/glue-temp-dir/" : "s3://glue-script-${var.account_id}/glue-temp-dir/"
     "--job-language"                     = "python"
     "--BUCKET_NAME"                      = "${var.s3_datalake_bucket_id}"
     "--DATABASE_NAME"                    = aws_glue_catalog_database.refined_data.name

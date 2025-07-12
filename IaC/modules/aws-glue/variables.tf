@@ -23,7 +23,7 @@ variable "glue_job_role_name" {
   type        = string
 }
 
-variable "s3_glue_script_bucket_id" {
+variable "s3_script_bucket_id" {
   description = "S3 Glue Script Bucket ID"
   type        = string
 }

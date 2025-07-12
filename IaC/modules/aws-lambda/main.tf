@@ -1,11 +1,30 @@
+resource "aws_lambda_layer_version" "bovespa_layer" {
+  layer_name = "bovespa_env"
+  compatible_runtimes = ["python3.12"]
+
+  s3_bucket = var.s3_script_bucket_name
+  s3_key = "lambda-bovespa/layer_env.zip"
+  
+  depends_on = [var.s3_lambda_layer_object]
+}
+
 resource "aws_lambda_function" "daily_lambda_bovespa" {
   function_name = "daily-lambda-bovespa"
   role          = "arn:aws:iam::${var.account_id}:role/${var.create_new_role_daily_lambda_bovespa == true ? var.daily_lambda_bovespa_role_name : var.name_role_daily_lambda_bovespa}"
   handler       = "main.handler"
-  runtime       = "python3.9"
+  runtime       = "python3.12"
 
   filename         = data.archive_file.daily_lambda_bovespa_scripts.output_path
   source_code_hash = data.archive_file.daily_lambda_bovespa_scripts.output_base64sha256
+
+  layers = [aws_lambda_layer_version.bovespa_layer.arn]
+
+    environment {
+    variables = {
+      BUCKET_NAME = var.s3_datalake_bucket_name
+      IBOV_URL = "https://sistemaswebb3-listados.b3.com.br/indexProxy/indexCall/GetDownloadPortfolioDay/eyJpbmRleCI6IklCT1YiLCJsYW5ndWFnZSI6InB0LWJyIn0="
+    }
+  }
 }
 
 resource "aws_lambda_permission" "bovespa_lambda_allow_event" {

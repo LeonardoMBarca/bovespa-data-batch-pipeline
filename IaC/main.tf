@@ -1,12 +1,12 @@
 module "s3" {
-  source = "./modules/s3"
+  source = "./modules/aws-s3"
 
   account_id               = data.aws_caller_identity.current.account_id
   create_new_role_glue_job = var.create_new_role_glue_job
 }
 
 module "lambda" {
-  source = "./modules/lambda"
+  source = "./modules/aws-lambda"
 
   account_id                             = data.aws_caller_identity.current.account_id
   create_new_role_daily_lambda_bovespa   = var.create_new_role_daily_lambda_bovespa
@@ -21,22 +21,24 @@ module "lambda" {
   cloudwatch_event_rule_arn              = module.cloudwatch.cloudwatch_event_rule_arn
   s3_datalake_bucket_arn                 = module.s3.s3_datalake_bucket_arn
   s3_datalake_bucket_name                = module.s3.s3_datalake_bucket
+  s3_script_bucket_name = module.s3.s3_script_bucket_name
+  s3_lambda_layer_object = module.s3.s3_lambda_layer_object
 }
 
 module "glue" {
-  source = "./modules/glue"
+  source = "./modules/aws-glue"
 
   account_id               = data.aws_caller_identity.current.account_id
   create_new_glue_job      = var.create_new_glue_job
   create_new_role_glue_job = var.create_new_role_glue_job
   name_glue_job_role       = var.name_glue_job_role
   glue_job_role_name       = module.iam.glue_job_role_name
-  s3_glue_script_bucket_id = module.s3.s3_glue_script_bucket_id
+  s3_script_bucket_id = module.s3.s3_script_bucket_name
   s3_datalake_bucket_id    = module.s3.s3_datalake_bucket_id
 }
 
 module "iam" {
-  source = "./modules/iam"
+  source = "./modules/aws-iam"
 
   account_id                             = data.aws_caller_identity.current.account_id
   s3_datalake_bucket                     = module.s3.s3_datalake_bucket
@@ -49,7 +51,7 @@ module "iam" {
 }
 
 module "cloudwatch" {
-  source = "./modules/cloudwatch"
+  source = "./modules/aws-cloudwatch"
 
   daily_lambda_bovespa_arn = module.lambda.daily_lambda_bovespa_arn
 }
