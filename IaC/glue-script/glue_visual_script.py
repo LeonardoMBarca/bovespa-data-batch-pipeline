@@ -58,7 +58,7 @@ AmazonS3_node1752329238402 = glueContext.create_dynamic_frame.from_options(forma
 Aggregate_node1752330350802 = sparkAggregate(glueContext, parentFrame = AmazonS3_node1752329238402, groups = ["acao", "data_pregao", "tipo"], aggs = [["qtd_teorica", "sum"], ["part", "avg"]], transformation_ctx = "Aggregate_node1752330350802")
 
 # Script generated for node Change Schema
-ChangeSchema_node1752331170902 = ApplyMapping.apply(frame=Aggregate_node1752330350802, mappings=[("acao", "string", "acao", "string"), ("data_pregao", "string", "data_pregao", "date"), ("tipo", "string", "tipo", "string"), ("`sum(qtd_teorica)`", "bigint", "`sum(qtd_teorica)`", "long"), ("`avg(part)`", "double", "participacao_media", "double")], transformation_ctx="ChangeSchema_node1752331170902")
+ChangeSchema_node1752331170902 = ApplyMapping.apply(frame=Aggregate_node1752330350802, mappings=[("acao", "string", "acao", "string"), ("data_pregao", "string", "data_pregao", "date"), ("tipo", "string", "tipo", "string"), ("`sum(qtd_teorica)`", "bigint", "quantidade_teorica", "long"), ("`avg(part)`", "double", "participacao_media", "double")], transformation_ctx="ChangeSchema_node1752331170902")
 
 # Script generated for node Custom Transform
 CustomTransform_node1752339344754 = MyTransform(glueContext, DynamicFrameCollection({"ChangeSchema_node1752331170902": ChangeSchema_node1752331170902}, glueContext))
