@@ -18,6 +18,6 @@ resource "aws_s3_object" "s3_glue_script_object" {
 resource "aws_s3_object" "s3_lambda_layer" {
   bucket = aws_s3_bucket.s3_script_bucket.id
   key = "lambda-bovespa/layer_env.zip"
-  source = "${path.module}/../../lambda-layer/lambda-layer.zip"
-  etag = filemd5("${path.module}/../../lambda-layer/lambda-layer.zip")
+  source = "${path.module}/../../lambda-layers/layer_env.zip"
+  etag = filemd5("${path.module}/../../lambda-layers/layer_env.zip")
 }
