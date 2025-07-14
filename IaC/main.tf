@@ -22,6 +22,8 @@ module "lambda" {
   s3_datalake_bucket_arn                 = module.s3.s3_datalake_bucket_arn
   s3_datalake_bucket_name                = module.s3.s3_datalake_bucket
   s3_script_bucket_name                  = module.s3.s3_script_bucket_name
+  ecr_image_name                         = var.ecr_image_name
+  ecr_image_tag                          = var.ecr_image_tag
 }
 
 module "glue" {

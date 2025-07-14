@@ -37,3 +37,13 @@ variable "name_glue_job_role" {
   description = "Daily Lambda Bovespa Role Name"
   type        = string
 }
+
+variable "ecr_image_name" {
+  description = "value of the ECR image name"
+  type        = string
+}
+
+variable "ecr_image_tag" {
+  description = "value of the ECR image tag"
+  type        = string
+}

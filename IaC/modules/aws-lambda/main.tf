@@ -2,7 +2,7 @@ resource "aws_lambda_function" "daily_lambda_bovespa" {
   function_name = "daily-lambda-bovespa"
 
   package_type = "Image"
-  image_uri    = "${var.account_id}.dkr.ecr.us-east-1.amazonaws.com/lambda-libs:latest"
+  image_uri    = "${var.account_id}.dkr.ecr.us-east-1.amazonaws.com/${var.ecr_image_name}:${var.ecr_image_tag}"
 
   role        = "arn:aws:iam::${var.account_id}:role/${var.create_new_role_daily_lambda_bovespa == true ? var.daily_lambda_bovespa_role_name : var.name_role_daily_lambda_bovespa}"
   memory_size = 512

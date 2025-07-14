@@ -38,9 +38,10 @@ Antes de iniciar o Terraform:
 2. Edite o arquivo `IaC/version.tf` com o nome do bucket:
 
 ```bash
-bucket = "NOME-DO-SEU-BUCKET"
-key    = "infra/tfstate_file.tfstate"
-region = "us-east-1"
+backend "s3" {
+  bucket = "NOME-DO-SEU-BUCKET"
+  key    = "infra/tfstate_file.tfstate"
+  region = "us-east-1"
 }
 ```
 
@@ -60,6 +61,22 @@ Instale conforme seu sistema operacional:
 * **Windows/macOS**: [Docker Desktop](https://docs.docker.com/desktop/)
 
 ### 4. ⚙️ Inicialização e Deploy da Infraestrutura
+
+Configure as variáveis de ambiente:
+
+```bash
+export TF_VAR_name_role_daily_lambda_bovespa="" # nome da role
+export TF_VAR_create_new_role_lambda_glue_activation="" # true ou false
+export TF_VAR_name_role_lambda_glue_activation="" # nome da role
+export TF_VAR_create_new_glue_job="" # true ou false
+export TF_VAR_name_glue_job="" # nome da role
+export TF_VAR_create_new_role_glue_job="" # true ou false
+export TF_VAR_name_glue_job_role="" # nome da role
+```
+
+Configure as variáveis do arquivo `terraform.tfvars` caso deseje alterar o valor das variáveis.
+
+E faça a configuração da infraestrutura com terraform:
 
 ```bash
 cd IaC
@@ -126,18 +143,6 @@ Esse comando irá:
 * Fazer login no ECR
 * Subir a imagem
 * (⚠️ *Não atualizar a função Lambda diretamente*) ← **só será atualizada via `terraform apply`**
-
-### 🌐 Variáveis Terraform
-
-```bash
-export TF_VAR_name_role_daily_lambda_bovespa="" # nome da role
-export TF_VAR_create_new_role_lambda_glue_activation="" # true ou false
-export TF_VAR_name_role_lambda_glue_activation="" # nome da role
-export TF_VAR_create_new_glue_job="" # true ou false
-export TF_VAR_name_glue_job="" # nome da role
-export TF_VAR_create_new_role_glue_job="" # true ou false
-export TF_VAR_name_glue_job_role="" # nome da role
-```
 
 ### 🧠 Fluxo da Solução
 

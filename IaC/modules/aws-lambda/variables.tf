@@ -67,3 +67,13 @@ variable "s3_script_bucket_name" {
   description = "S3 Script Bucket Name"
   type        = string
 }
+
+variable "ecr_image_name" {
+  description = "value of the ECR image name"
+  type        = string
+}
+
+variable "ecr_image_tag" {
+  description = "value of the ECR image tag"
+  type        = string
+}
