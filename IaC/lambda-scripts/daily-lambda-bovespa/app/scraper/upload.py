@@ -3,13 +3,10 @@ import logging
 import pandas as pd
 import boto3
 from datetime import datetime
-from config import DOWNLOAD_DIR, LOG_FILE
 
 S3_BUCKET = os.environ.get("S3_BUCKET", "")
 S3_PREFIX = S3_PREFIX = "raw/"
-
-os.makedirs(DOWNLOAD_DIR, exist_ok=True)
-os.makedirs(os.path.dirname(LOG_FILE), exist_ok=True)
+DOWNLOAD_DIR = "b3/raw"
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

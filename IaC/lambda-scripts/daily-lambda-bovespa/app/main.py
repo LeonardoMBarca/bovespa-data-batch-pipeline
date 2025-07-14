@@ -1,11 +1,12 @@
 from scraper.downloader import download_base
 from scraper.upload import csv_to_parquet, upload_to_s3
-from config import DOWNLOAD_DIR
 from datetime import datetime
 import os
 import requests
 import pyarrow
 import pandas
+
+DOWNLOAD_DIR = "b3/raw"
 
 def handler(event, context):
     download_base()

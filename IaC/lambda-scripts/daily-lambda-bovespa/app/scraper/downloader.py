@@ -2,10 +2,10 @@ import os
 import requests
 import base64
 from datetime import datetime
-from config import DOWNLOAD_DIR
 import shutil
 
 IBOV_URL = os.environ.get("IBOV_URL", "")
+DOWNLOAD_DIR = "b3/raw"
 
 def clear_data(path: str):
     if os.path.exists(path):
