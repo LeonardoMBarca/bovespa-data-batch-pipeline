@@ -1,132 +1,133 @@
 # 📊 Bovespa Data Batch Pipeline
 
-> Pipeline de dados em lote para coleta e processamento de dados da Bovespa usando AWS
+Pipeline de dados em lote para coleta e processamento de dados da Bovespa usando AWS (Lambda, Glue, S3 e CloudWatch).
 
----
+## 📁 Estrutura do Projeto
 
-## 🏗️ Arquitetura da Infraestrutura
-
-### 📁 Estrutura Modular
-
-```
+```bash
 IaC/
 ├── modules/
-│   ├── s3/          # Buckets S3 (state, datalake, scripts)
-│   ├── lambda/      # Funções Lambda (coleta e trigger)
-│   ├── glue/        # Job de processamento Glue
-│   ├── iam/         # Roles e políticas IAM
-│   └── cloudwatch/  # Agendamento de eventos
-├── main.tf          # Orquestração dos módulos
-├── variables.tf     # Variáveis globais
-└── version.tf       # Backend e providers
+│ ├── s3/ # Buckets S3 (state, datalake, scripts)
+│ ├── lambda/ # Funções Lambda (coleta e trigger)
+│ ├── glue/ # Job de processamento Glue
+│ ├── iam/ # Roles e políticas IAM
+│ └── cloudwatch/ # Agendamento de eventos
+├── main.tf # Orquestração dos módulos
+├── variables.tf # Variáveis globais
+└── version.tf # Backend e providers
 ```
 
-### 🔧 Componentes AWS
+## 🔧 Pré-requisitos
 
+### 1. 🔐 Credenciais AWS
 
-| Módulo        | Recursos                        | Descrição                |
-| -------------- | ------------------------------- | -------------------------- |
-| **S3**         | State bucket, Datalake, Scripts | Armazenamento distribuído |
-| **Lambda**     | Daily collector, Glue trigger   | Funções serverless       |
-| **Glue**       | Processing job                  | Transformação de dados   |
-| **CloudWatch** | Event rule                      | Agendamento (12:00 UTC)    |
-| **IAM**        | Service roles                   | Permissões granulares     |
+Configure no arquivo `~/.aws/credentials`:
 
-### 🔄 Fluxo de Dados
-
-```mermaid
-graph LR
-    A[CloudWatch Event] --> B[Lambda Daily]
-    B --> C[S3 Raw Data]
-    C --> D[Lambda Glue Trigger]
-    D --> E[Glue Job]
-    E --> F[Processed Data]
+```bash
+[default]
+aws_access_key_id = SUA_KEY
+aws_secret_access_key = SUA_SECRET
+aws_session_token = SEU_TOKEN   # caso temporário
 ```
 
-1. **⏰ Agendamento**: CloudWatch Event dispara diariamente às 12:00 UTC
-2. **📥 Coleta**: Lambda executa e coleta dados da Bovespa
-3. **💾 Armazenamento**: Dados salvos no S3 (pasta `raw/`)
-4. **🚀 Trigger**: S3 event ativa Lambda de processamento
-5. **⚙️ Transformação**: Glue processa arquivos `.parquet`
+### 2. 🪣 Configurar o Bucket do Terraform (State Remoto)
 
----
+Antes de iniciar o Terraform:
 
-## ⚙️ Configuração e Deploy
+1. Crie um bucket S3 manualmente.
+2. Edite o arquivo `IaC/version.tf` com o nome do bucket:
 
-### 📋 Pré-requisitos
+```bash
+bucket = "NOME-DO-SEU-BUCKET"
+key    = "infra/tfstate_file.tfstate"
+region = "us-east-1"
+}
+```
 
-#### 1. 🐳 Docker
+### 3. 🐳 Docker
 
-O Docker é necessário para criar o layer das dependências Python para as funções Lambda.
+Necessário para empacotar a imagem da função Lambda com as dependências (`pandas`, `requests`, `pyarrow`, etc).
 
-**📥 Instalação por Sistema Operacional:**
-
-- **🐧 Linux (Ubuntu)**: [Guia Oficial](https://docs.docker.com/engine/install/ubuntu/)
-- **🪟 Windows**: [Docker Desktop](https://docs.docker.com/desktop/setup/install/windows-install/)
-- **🔧 WSL**: [Guia Completo](https://medium.com/@habbema/guia-de-instala%C3%A7%C3%A3o-do-docker-no-wsl-2-com-ubuntu-22-04-9ceabe4d79e8)
-- **🍎 macOS**: [Docker Desktop](https://docs.docker.com/desktop/setup/install/mac-install/)
-
-**✅ Verificação:**
+Verifique:
 
 ```bash
 docker --version
 ```
 
-#### 2. 📦 Criação do Layer Lambda
+Instale conforme seu sistema operacional:
 
-Antes do deploy, você deve criar o arquivo ZIP com as dependências Python:
+* **Linux (Ubuntu)**: [Guia Oficial](https://docs.docker.com/engine/install/ubuntu/)
+* **Windows/macOS**: [Docker Desktop](https://docs.docker.com/desktop/)
+
+### 4. ⚙️ Inicialização e Deploy da Infraestrutura
 
 ```bash
-# 1. Construir a imagem Docker com as dependências
-docker build -t lambda-layers-builder -f docker/Dockerfile .
-
-# 2. Criar um container temporário (sem executá-lo)
-docker create --name extract lambda-layers-builder bash
-
-# 3. Copiar o arquivo ZIP do container para o projeto
-docker cp extract:/layer_env.zip ./lambda-layers/layer_env.zip
-
-# 4. Remover o container temporário
-docker rm extract
+cd IaC
+terraform init
+terraform plan
+terraform apply
 ```
 
-**📝 Explicação dos Comandos:**
+## 🐍 Lambda com Dependências via Docker + ECR
 
-- `docker build`: Constrói uma imagem contendo todas as dependências Python necessárias
-- `docker create`: Cria um container sem iniciá-lo, permitindo acesso aos arquivos
-- `docker cp`: Copia o arquivo ZIP gerado do container para o diretório local
-- `docker rm`: Remove o container temporário para limpeza
+### Estrutura da Lambda
 
-#### 3. 🔐 Credenciais AWS
-
-Configure suas credenciais no arquivo `~/.aws/credentials`:
-
-```ini
-[default]
-aws_access_key_id = <sua_access_key>
-aws_secret_access_key = <sua_secret_key>
-aws_session_token = <seu_session_token>  # Se usando sessão temporária
+```bash
+lambda-scripts/
+└── daily-lambda-bovespa/
+    ├── app/
+    │   ├── main.py
+    │   └── config.py
+    ├── requirements.txt
+    └── Makefile
 ```
 
-#### 2. 🪣 State Bucket (OBRIGATÓRIO)
+### 📦 Primeira Configuração (ECR)
 
-**⚠️ IMPORTANTE**: Antes de executar `terraform init`, você deve:
+Só precisa ser feita uma vez:
 
-1. Criar manualmente um bucket S3 para o estado do Terraform
-2. Alterar o nome do bucket no arquivo `IaC/version.tf`
+```bash
+# 1. Fazer login no ECR
+aws ecr get-login-password | docker login --username AWS --password-stdin <sua-conta>.dkr.ecr.<sua-regiao>.amazonaws.com
 
-```hcl
-# IaC/version.tf
-backend "s3" {
-  bucket = "SEU-BUCKET-TERRAFORM-STATE"  # ← Altere aqui
-  key    = "infra/tfstate_file.tfstate"
-  region = "us-east-1"
-}
+# 2. Criar repositório no ECR
+aws ecr create-repository --repository-name <nome-repositorio>
+
+# 3. Construir a imagem Docker
+docker build -t <nome-repositorio> .
+
+# 4. Criar tag para o ECR
+docker tag <nome-repositorio>:latest <sua-conta>.dkr.ecr.<sua-regiao>.amazonaws.com/<nome-repositorio>:latest
+
+# 5. Enviar imagem para o ECR
+docker push <sua-conta>.dkr.ecr.us-east-1.amazonaws.com/<nome-repositorio>:latest
 ```
 
-### 🛠️ Configuração de Variáveis
+### 🔄 Atualização de Imagem (Makefile)
 
-#### Variáveis de Ambiente (Alternativa)
+Primeiramente exporte as variáveis de ambiente com as informações necessárias:
+
+```bash
+export AWS_REGION=<sua-região>
+export AWS_ACCOUNT_ID=<id-da-sua-conta>
+export LAMBDA_REPO=<nome-do-seu-repositorio>
+```
+
+Após isto execute os comandos:
+
+```bash
+cd IaC/lambda-scripts/daily-lambda-bovespa
+make deploy
+```
+
+Esse comando irá:
+
+* Buildar a imagem Docker
+* Fazer login no ECR
+* Subir a imagem
+* (⚠️ *Não atualizar a função Lambda diretamente*) ← **só será atualizada via `terraform apply`**
+
+### 🌐 Variáveis Terraform
 
 ```bash
 export TF_VAR_name_role_daily_lambda_bovespa="" # nome da role
@@ -135,66 +136,21 @@ export TF_VAR_name_role_lambda_glue_activation="" # nome da role
 export TF_VAR_create_new_glue_job="" # true ou false
 export TF_VAR_name_glue_job="" # nome da role
 export TF_VAR_create_new_role_glue_job="" # true ou false
-export TF_VAR_name_glue_job_role="" # nome da role```
+export TF_VAR_name_glue_job_role="" # nome da role
 ```
 
-### 🚀 Deploy da Infraestrutura
+### 🧠 Fluxo da Solução
 
-```bash
-# 1. Navegar para o diretório
-cd IaC
-
-# 2. Inicializar Terraform
-terraform init
-
-# 3. Planejar mudanças
-terraform plan
-
-# 4. Aplicar infraestrutura
-terraform apply
+```grmermaid
+A[CloudWatch Event] --> B[Lambda Daily]
+B --> C[S3 Raw Data]
+C --> D[Lambda Glue Trigger]
+D --> E[Glue Job]
+E --> F[Processed Data]
 ```
 
----
+## 📚 Links Úteis
 
-## 🔧 Instalação do Terraform
-
-### 🪟 Windows
-
-1. **📥 Download**
-
-   - Acesse: https://www.terraform.io/downloads
-   - Baixe o arquivo ZIP para Windows
-2. **⚙️ Instalação**
-
-   ```cmd
-   # Extrair terraform.exe para C:\terraform
-   # Adicionar C:\terraform ao PATH do sistema
-   ```
-3. **✅ Verificação**
-
-   ```cmd
-   terraform --version
-   ```
-
-### 🐧 Linux
-
-**Ubuntu/Debian:**
-
-```bash
-wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
-echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
-sudo apt update && sudo apt install terraform
-```
-
-```**✅ Verificação:**
-
-```bash
-terraform --version
-```
----
-
-## 📚 Recursos Úteis
-
-- 📖 [Documentação Oficial do Terraform](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
-- 🏗️ [AWS Provider Documentation](https://registry.terraform.io/providers/hashicorp/aws/latest/docs)
-- 📊 [Bovespa API Documentation](https://www.b3.com.br/pt_br/market-data-e-indices/)
+* 📖 [Terraform Docs](https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli)
+* 📘 [AWS ECR](https://docs.aws.amazon.com/AmazonECR/latest/userguide/what-is-ecr.html)
+* 🔬 [API Bovespa](https://www.b3.com.br/pt_br/market-data-e-indices/)

@@ -21,8 +21,7 @@ module "lambda" {
   cloudwatch_event_rule_arn              = module.cloudwatch.cloudwatch_event_rule_arn
   s3_datalake_bucket_arn                 = module.s3.s3_datalake_bucket_arn
   s3_datalake_bucket_name                = module.s3.s3_datalake_bucket
-  s3_script_bucket_name = module.s3.s3_script_bucket_name
-  s3_lambda_layer_object = module.s3.s3_lambda_layer_object
+  s3_script_bucket_name                  = module.s3.s3_script_bucket_name
 }
 
 module "glue" {
@@ -33,7 +32,7 @@ module "glue" {
   create_new_role_glue_job = var.create_new_role_glue_job
   name_glue_job_role       = var.name_glue_job_role
   glue_job_role_name       = module.iam.glue_job_role_name
-  s3_script_bucket_id = module.s3.s3_script_bucket_name
+  s3_script_bucket_id      = module.s3.s3_script_bucket_name
   s3_datalake_bucket_id    = module.s3.s3_datalake_bucket_id
 }
 

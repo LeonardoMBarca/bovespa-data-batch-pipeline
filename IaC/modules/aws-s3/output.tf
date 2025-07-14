@@ -13,7 +13,3 @@ output "s3_datalake_bucket_id" {
 output "s3_script_bucket_name" {
   value = aws_s3_bucket.s3_script_bucket.bucket
 }
-
-output "s3_lambda_layer_object" {
-  value = aws_s3_object.s3_lambda_layer
-}
