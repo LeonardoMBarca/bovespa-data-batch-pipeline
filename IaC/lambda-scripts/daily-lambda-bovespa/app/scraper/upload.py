@@ -4,25 +4,27 @@ import pandas as pd
 import boto3
 from datetime import datetime
 
-S3_BUCKET = os.environ.get("S3_BUCKET", "")
+BUCKET_NAME = os.environ.get("BUCKET_NAME", "")
 S3_PREFIX = S3_PREFIX = "raw/"
 DOWNLOAD_DIR = "b3/raw"
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def csv_to_parquet(csv_path):
+def csv_to_parquet(csv_content):
     try:
-        with open(csv_path, encoding="latin1") as f:
-            primeira_linha = f.readline()
-            data_pregao_br = primeira_linha.strip().split()[-1]
-            try:
-                pregao_date = datetime.strptime(data_pregao_br, "%d/%m/%y").date().isoformat()
-            except Exception:
-                pregao_date = datetime.today().strftime("%Y-%m-%d")
+        from io import StringIO
+        
+        lines = csv_content.strip().split('\n')
+        primeira_linha = lines[0]
+        data_pregao_br = primeira_linha.strip().split()[-1]
+        try:
+            pregao_date = datetime.strptime(data_pregao_br, "%d/%m/%y").date().isoformat()
+        except Exception:
+            pregao_date = datetime.today().strftime("%Y-%m-%d")
 
         df = pd.read_csv(
-            csv_path,
+            StringIO(csv_content),
             sep=";",
             encoding="latin1",
             skiprows=1,
@@ -37,7 +39,7 @@ def csv_to_parquet(csv_path):
         df["data_pregao"] = pregao_date
 
         # Conversão de campos numéricos:
-        df["qtd_teorica"] = df["qtd_teorica"].str.replace(".", "", regex=False)  # remove pontos dos milhares
+        df["qtd_teorica"] = df["qtd_teorica"].str.replace(".", "", regex=False)
         df["qtd_teorica"] = df["qtd_teorica"].str.replace(",", ".", regex=False)
         df["qtd_teorica"] = pd.to_numeric(df["qtd_teorica"], errors="coerce")
 
@@ -45,32 +47,35 @@ def csv_to_parquet(csv_path):
         df["part"] = pd.to_numeric(df["part"], errors="coerce")
 
         df = df.dropna(how="all")
-
-        parquet_dir = os.path.join("data/bronze-layer", f"pregao={pregao_date}")
-        os.makedirs(parquet_dir, exist_ok=True)
-        parquet_path = os.path.join(parquet_dir, "IBOV.parquet")
-        if os.path.exists(parquet_path):
-            os.remove(parquet_path)
-        df.to_parquet(parquet_path, index=False)
-        print(f"Parquet gerado em: {parquet_path}")
-        return parquet_path, pregao_date
+        
+        # Armazenar DataFrame globalmente para upload
+        global processed_df
+        processed_df = df
+        
+        logging.info(f"Parquet processado para data: {pregao_date}")
+        return pregao_date
 
     except Exception as e:
-        print(f"[ERRO] Falha na conversão para Parquet: {e}")
-        return None, None
+        logging.error(f"Falha na conversão para Parquet: {e}")
+        raise
 
 
 
-def upload_to_s3(parquet_path, pregao_date):
+def upload_to_s3(pregao_date):
     """
-    Faz upload do arquivo parquet para o S3, na partição do dia.
+    Faz upload do DataFrame processado para o S3 como parquet.
     """
     try:
-        s3_key = f"{S3_PREFIX}/pregao={pregao_date}/IBOV.parquet"
+        global processed_df
+        s3_key = f"{S3_PREFIX}pregao={pregao_date}/IBOV.parquet"
+        
+        # Converter DataFrame para parquet em memória
+        parquet_buffer = processed_df.to_parquet(index=False)
+        
         s3 = boto3.client('s3')
-        s3.upload_file(parquet_path, S3_BUCKET, s3_key)
+        s3.put_object(Bucket=BUCKET_NAME, Key=s3_key, Body=parquet_buffer)
+        
         logging.info(f"Arquivo Parquet enviado ao S3 em {s3_key}")
-        print(f"Arquivo Parquet enviado ao S3 em {s3_key}")
     except Exception as e:
-        logging.error(f"[ERRO] Falha ao enviar arquivo ao S3: {e}")
-        print(f"[ERRO] Falha ao enviar arquivo ao S3: {e}")
+        logging.error(f"Falha ao enviar arquivo ao S3: {e}")
+        raise

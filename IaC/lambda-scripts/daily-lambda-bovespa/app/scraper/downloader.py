@@ -3,6 +3,11 @@ import requests
 import base64
 from datetime import datetime
 import shutil
+import logging 
+from requests.exceptions import Timeout, RequestException
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 IBOV_URL = os.environ.get("IBOV_URL", "")
 DOWNLOAD_DIR = "b3/raw"
@@ -12,28 +17,33 @@ def clear_data(path: str):
         shutil.rmtree(path)
     os.makedirs(path, exist_ok=True)
 
+def safe_decode(content):
+    try:
+        decoded = base64.b64decode(content, validate=True)
+        return decoded 
+    except Exception:
+        return content
+
 def download_base():
-    clear_data(DOWNLOAD_DIR)
-    today = datetime.today().strftime("%Y-%m-%d")
-    output_dir = os.path.join(DOWNLOAD_DIR, f"date={today}")
-    os.makedirs(output_dir, exist_ok=True)
-
-    url_dict = IBOV_URL if isinstance(IBOV_URL, dict) else {'IBOV': IBOV_URL}
-    for name, url in url_dict.items():
-        try:
-            filepath = os.path.join(output_dir, f"{name}.csv")
-            response = requests.get(url, timeout=30)
-            response.raise_for_status()
-            # Decodifica base64 se necessário
-            try:
-                content = base64.b64decode(response.content)
-            except Exception:
-                content = response.content
-            with open(filepath, "wb") as f:
-                f.write(content)
-            print(f"✅ Download: {filepath}")
-        except Exception as e:
-            print(f"❌ Erro ao baixar {name}: {e}")
-
-if __name__ == "__main__":
-    download_base()
+    url = IBOV_URL
+    
+    try:
+        response = requests.get(url, timeout=30)
+        response.raise_for_status()
+        
+        content = safe_decode(response.content)
+        if isinstance(content, bytes):
+            content = content.decode('latin1')
+            
+        logging.info("CSV content retrieved successfully")
+        return content
+        
+    except Timeout:
+        logging.error("Timeout while downloading")
+        raise
+    except RequestException as e:
+        logging.error(f"Request error: {e}")
+        raise
+    except Exception as e:
+        logging.exception(f"Unexpected error: {e}")
+        raise
