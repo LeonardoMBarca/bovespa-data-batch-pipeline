@@ -7,6 +7,10 @@ resource "aws_s3_bucket" "s3_script_bucket" {
   bucket = "scripts-${var.account_id}"
 }
 
+resource "aws_s3_bucket" "s3_athena_query_results" {
+  bucket = "athena-query-results-${var.account_id}"
+}
+
 resource "aws_s3_object" "s3_glue_script_object" {
   count = var.create_new_role_glue_job ? 1 : 0
 

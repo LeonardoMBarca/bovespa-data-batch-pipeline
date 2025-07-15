@@ -56,3 +56,11 @@ module "cloudwatch" {
 
   daily_lambda_bovespa_arn = module.lambda.daily_lambda_bovespa_arn
 }
+
+module "athena" {
+  source = "./modules/aws-athena"
+
+  account_id                     = data.aws_caller_identity.current.account_id
+  s3_athena_query_results_bucket = module.s3.s3_athena_query_results_bucket_name
+  database_name = module.glue.glue_database_name
+}

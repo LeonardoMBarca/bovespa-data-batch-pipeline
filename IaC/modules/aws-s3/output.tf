@@ -13,3 +13,7 @@ output "s3_datalake_bucket_id" {
 output "s3_script_bucket_name" {
   value = var.create_new_role_glue_job ? aws_s3_bucket.s3_script_bucket[0].bucket : null
 }
+
+output "s3_athena_query_results_bucket_name" {
+  value = aws_s3_bucket.s3_athena_query_results.bucket
+}
