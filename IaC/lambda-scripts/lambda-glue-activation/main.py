@@ -10,7 +10,7 @@ client = boto3.client("glue")
 JOB_NAME = os.environ.get("JOB_NAME", "")
 
 def handler(event, context):
-    logger.info(f"## INITIATED BY EVENT: {event['detail']}")
+    logger.info(f"STARTING GLUE JOB WITH EVET {event}")
 
     response = client.start_job_run(JobName=JOB_NAME)
     logger.info(f"## STARTED GLUE JOB: {JOB_NAME}")
