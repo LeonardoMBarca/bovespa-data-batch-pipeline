@@ -1,4 +1,7 @@
-# Variáveis de ambiente (ou use export no terminal)
+# Variáveis de ambiente
+include .env
+export
+
 REGIAO ?= $(AWS_REGION)
 CONTA ?= $(AWS_ACCOUNT_ID)
 REPOSITORIO ?= $(LAMBDA_REPO)
