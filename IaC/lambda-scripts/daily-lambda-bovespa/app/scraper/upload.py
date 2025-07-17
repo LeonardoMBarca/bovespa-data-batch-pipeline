@@ -5,8 +5,7 @@ import boto3
 from datetime import datetime
 
 BUCKET_NAME = os.environ.get("BUCKET_NAME", "")
-S3_PREFIX = S3_PREFIX = "raw/"
-DOWNLOAD_DIR = "b3/raw"
+S3_PREFIX = "raw/"
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)

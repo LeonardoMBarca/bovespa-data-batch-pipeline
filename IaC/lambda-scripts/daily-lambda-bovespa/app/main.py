@@ -4,8 +4,6 @@ from datetime import datetime
 import os
 import json
 
-DOWNLOAD_DIR = "b3/raw"
-
 def handler(event, context):
     try:
         csv_content = download_base()

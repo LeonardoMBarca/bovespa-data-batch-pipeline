@@ -10,7 +10,6 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 IBOV_URL = os.environ.get("IBOV_URL", "")
-DOWNLOAD_DIR = "b3/raw"
 
 def clear_data(path: str):
     if os.path.exists(path):
