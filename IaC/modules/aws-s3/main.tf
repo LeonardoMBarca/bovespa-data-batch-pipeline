@@ -16,6 +16,6 @@ resource "aws_s3_object" "s3_glue_script_object" {
 
   bucket = aws_s3_bucket.s3_script_bucket[0].id
   key    = "glue/glue_script.py"
-  source = "${path.module}/../../glue-script/glue_script.py"
-  etag   = filemd5("${path.module}/../../glue-script/glue_script.py")
+  source = "${path.module}/../../scripts/glue-script/glue_script.py"
+  etag   = filemd5("${path.module}/../../scripts/glue-script/glue_script.py")
 }

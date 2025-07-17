@@ -181,3 +181,58 @@ resource "aws_iam_role_policy" "glue_job_policy" {
     ]
   })
 }
+
+resource "aws_iam_role" "ec2_profile_role" {
+  count = var.create_new_ec2_profile_role ? 1 : 0
+
+  name = "FirehosePutRecordRole"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Action    = "sts:AssumeRole",
+        Principal = {
+          Service = "ec2.amazonaws.com"
+        },
+        Effect    = "Allow",
+        Sid       = ""
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "glue_job_policy" {
+  count = var.create_new_role_glue_job ? 1 : 0
+
+  name = "FirehosePutRecordPolicy"
+  role = aws_iam_role.ec2_profile_role
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Effect   = "Allow",
+        Action   = [
+          "firehose:PutRecord",
+          "firehose:PutRecordBatch"
+        ],
+        Resource = "*"
+      },
+      {
+        Effect   = "Allow",
+        Action   = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+resource "aws_iam_instance_profile" "kinesis_bitcoin" {
+  name = "profile_for_ec2_instance"
+  role = aws_iam_role.ec2_profile_role[0].name ? 1 : var.instance_profile_role_name
+}

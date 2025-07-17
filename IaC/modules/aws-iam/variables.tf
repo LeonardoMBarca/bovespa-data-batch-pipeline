@@ -37,3 +37,13 @@ variable "glue_job_name" {
   description = "Glue Job name from module"
   type        = string
 }
+
+variable "create_new_ec2_profile_role" {
+  description = "Option to choose whether to use an existing role or create one"
+  type = bool
+}
+
+variable "instance_profile_role_name" {
+  description = "Instance profile name"
+  type = string
+}

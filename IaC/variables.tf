@@ -47,3 +47,13 @@ variable "ecr_image_tag" {
   description = "value of the ECR image tag"
   type        = string
 }
+
+variable "create_new_ec2_profile_role" {
+  description = "Option to choose whether to use an existing instance profile or create one"
+  type = bool
+}
+
+variable "instance_profile_role_name" {
+  description = "Instance profile name"
+  type = string
+}
