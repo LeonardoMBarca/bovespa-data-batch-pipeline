@@ -57,15 +57,3 @@ variable "instance_profile_role_name" {
   description = "Instance profile name"
   type        = string
 }
-
-variable "key_name" {
-  description = "Name of the SSH key pair to use for the EC2 instance"
-  type        = string
-  default     = ""
-}
-
-variable "private_key_path" {
-  description = "Path to the private key file for SSH connection"
-  type        = string
-  default     = ""
-}

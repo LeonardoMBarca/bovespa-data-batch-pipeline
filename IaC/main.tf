@@ -72,6 +72,4 @@ module "ec2" {
 
   account_id            = data.aws_caller_identity.current.account_id
   instance_profile_name = module.iam.instance_profile_name
-  key_name              = var.key_name
-  private_key_path      = var.private_key_path
 }
