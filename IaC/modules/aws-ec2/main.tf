@@ -116,6 +116,7 @@ Description=Bitcoin Firehose Ingestor
 After=network.target
 
 [Service]
+Environment=PYTHONUNBUFFERED=1
 Type=simple
 User=ec2-user
 WorkingDirectory=/home/ec2-user/app
