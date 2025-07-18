@@ -11,7 +11,7 @@ output "glue_job_role_name" {
 }
 
 output "instance_profile_name" {
-  value = var.create_new_ec2_profile_role ? aws_iam_instance_profile.kinesis_bitcoin.name : ""
+  value = aws_iam_instance_profile.kinesis_bitcoin.name
 }
 
 output "lambda_bitcoin_backup_role_name" {

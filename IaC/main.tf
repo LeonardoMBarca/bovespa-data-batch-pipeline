@@ -83,6 +83,7 @@ module "ec2" {
 
   account_id            = data.aws_caller_identity.current.account_id
   instance_profile_name = module.iam.instance_profile_name
+  key_name              = var.key_name
 }
 
 module "kinesis" {
@@ -94,3 +95,4 @@ module "kinesis" {
   firehose_role            = module.iam.firehose_role
   role_firehose            = var.role_firehose
 }
+

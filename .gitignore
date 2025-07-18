@@ -2,7 +2,7 @@ env_vars.sh
 .terraform/
 daily-lambda-bovespa.zip
 lambda-glue-activation.zip
-
+chave-ec2-stream.pem
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]

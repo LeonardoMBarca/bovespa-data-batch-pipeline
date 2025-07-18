@@ -77,3 +77,8 @@ variable "create_new_firehose_role" {
 variable "role_firehose" {
   type = string
 }
+
+variable "key_name" {
+  description = "Nome do par de chaves SSH para acessar a instância EC2"
+  type        = string
+}
