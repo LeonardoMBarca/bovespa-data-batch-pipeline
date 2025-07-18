@@ -49,8 +49,8 @@ module "iam" {
   create_new_glue_job                    = var.create_new_glue_job
   name_glue_job                          = var.name_glue_job
   glue_job_name                          = module.glue.glue_job_name
-  create_new_ec2_profile_role = var.create_new_ec2_profile_role
-  instance_profile_role_name = var.instance_profile_role_name
+  create_new_ec2_profile_role            = var.create_new_ec2_profile_role
+  instance_profile_role_name             = var.instance_profile_role_name
 }
 
 module "cloudwatch" {
@@ -70,6 +70,8 @@ module "athena" {
 module "ec2" {
   source = "./modules/aws-ec2"
 
-  account_id               = data.aws_caller_identity.current.account_id
+  account_id            = data.aws_caller_identity.current.account_id
   instance_profile_name = module.iam.instance_profile_name
+  key_name              = var.key_name
+  private_key_path      = var.private_key_path
 }

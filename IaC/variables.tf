@@ -50,10 +50,22 @@ variable "ecr_image_tag" {
 
 variable "create_new_ec2_profile_role" {
   description = "Option to choose whether to use an existing instance profile or create one"
-  type = bool
+  type        = bool
 }
 
 variable "instance_profile_role_name" {
   description = "Instance profile name"
-  type = string
+  type        = string
+}
+
+variable "key_name" {
+  description = "Name of the SSH key pair to use for the EC2 instance"
+  type        = string
+  default     = ""
+}
+
+variable "private_key_path" {
+  description = "Path to the private key file for SSH connection"
+  type        = string
+  default     = ""
 }

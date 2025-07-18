@@ -4,11 +4,16 @@ variable "account_id" {
 }
 
 variable "instance_profile_name" {
-    description = "instance profile name"
-    type = string
+  description = "instance profile name"
+  type        = string
 }
 
-variable "subnet_id" {
-    description = "Subnet Id"
-    type = string
+variable "key_name" {
+  description = "Name of the SSH key pair to use for the instance"
+  type        = string
+}
+
+variable "private_key_path" {
+  description = "Path to the private key file for SSH connection"
+  type        = string
 }
