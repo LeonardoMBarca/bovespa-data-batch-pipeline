@@ -236,3 +236,101 @@ resource "aws_iam_instance_profile" "kinesis_bitcoin" {
   name = "profile_for_ec2_instance"
   role = var.create_new_ec2_profile_role ? aws_iam_role.ec2_profile_role[0] : var.instance_profile_role_name
 }
+
+resource "aws_iam_role" "lambda_bitcoin_backup_role" {
+  count = var.create_new_role_lambda_bitcoin_backup ? 1 : 0
+
+  name = "lambda-bitcoin-backup-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "lambda_bitcoin_backup_policy" {
+  count = var.create_new_role_lambda_bitcoin_backup ? 1 : 0
+
+  name = "lambda-bitcoin-backup-policy"
+  role = aws_iam_role.lambda_bitcoin_backup_role[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Sid    = "AllowCloudWatchLogs"
+        Effect = "Allow"
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "arn:aws:logs:*:*:*"
+      },
+      {
+        Sid    = "AllowS3Access"
+        Effect = "Allow"
+        Action = [
+          "s3:GetObject",
+          "s3:PutObject",
+          "s3:ListBucket"
+        ]
+        Resource = [
+          "arn:aws:s3:::${var.bitcoin_backup_name}",
+          "arn:aws:s3:::${var.bitcoin_backup_name}/*"
+        ]
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role" "firehose_role" {
+  count = var.create_new_firehose_role ? 1 : 0
+
+  name = "firehose-streaming-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Action = "sts:AssumeRole"
+        Effect = "Allow"
+        Principal = {
+          Service = "firehose.amazonaws.com"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy" "firehose_policy" {
+  count = var.create_new_firehose_role ? 1 : 0
+
+  name = "firehose-streaming-policy"
+  role = aws_iam_role.firehose_role[0].id
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect = "Allow",
+      Action = [
+        "s3:PutObject",
+        "s3:PutObjectAcl",
+        "s3:GetBucketLocation",
+        "s3:ListBucket"
+      ],
+      Resource = [
+        var.firehose_bucket_arn,
+        "${var.firehose_bucket_arn}/*"
+      ]
+    }]
+  })
+}

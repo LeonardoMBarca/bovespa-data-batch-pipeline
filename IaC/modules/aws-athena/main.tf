@@ -1,6 +1,8 @@
 resource "aws_athena_workgroup" "default" {
   name = "bovespa_workgroup"
 
+  force_destroy = true
+
   configuration {
     result_configuration {
       output_location = "s3://${var.s3_athena_query_results_bucket}/"

@@ -57,3 +57,23 @@ variable "instance_profile_role_name" {
   description = "Instance profile name"
   type        = string
 }
+
+variable "ecr_image_name_bitcoin" {
+  type = string
+}
+
+variable "create_new_role_lambda_bitcoin_backup" {
+  type = bool
+}
+
+variable "role_lambda_backup_name" {
+  type = string
+}
+
+variable "create_new_firehose_role" {
+  type = bool
+}
+
+variable "role_firehose" {
+  type = string
+}

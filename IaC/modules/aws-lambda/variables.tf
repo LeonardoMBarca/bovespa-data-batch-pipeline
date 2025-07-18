@@ -77,3 +77,27 @@ variable "ecr_image_tag" {
   description = "value of the ECR image tag"
   type        = string
 }
+
+variable "s3_backup_bitcoin_bucket_name" {
+  type = string
+}
+
+variable "ecr_image_name_bitcoin" {
+  type = string
+}
+
+variable "create_new_role_lambda_backup" {
+  type = bool
+}
+
+variable "role_lambda_backup_name" {
+  type = string
+}
+
+variable "lambda_backup_role_name" {
+  type = string
+}
+
+variable "event_bitcoin_arn" {
+  type = string
+}

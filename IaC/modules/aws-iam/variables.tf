@@ -47,3 +47,20 @@ variable "instance_profile_role_name" {
   description = "Instance profile name"
   type        = string
 }
+
+variable "create_new_role_lambda_bitcoin_backup" {
+  description = "Option to choose whether to use an existing role or create one for bitcoin backup lambda"
+  type        = bool
+}
+
+variable "bitcoin_backup_name" {
+  type = string
+}
+
+variable "create_new_firehose_role" {
+  type = string
+}
+
+variable "firehose_bucket_arn" {
+  type = string
+}
