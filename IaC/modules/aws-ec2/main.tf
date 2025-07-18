@@ -66,6 +66,11 @@ cat > /home/ec2-user/main.py << 'MAINPY'
 ${file("${path.module}/../../scripts/stream-script-folder/main.py")}
 MAINPY
 
+# Create .env file
+cat > /home/ec2-user/.env << 'ENVFILE'
+${file("${path.module}/../../scripts/stream-script-folder/.env.stream")}
+ENVFILE
+
 chmod +x /home/ec2-user/main.py
 
 # Run the script
