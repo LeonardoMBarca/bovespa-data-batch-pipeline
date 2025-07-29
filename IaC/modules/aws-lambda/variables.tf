@@ -101,3 +101,6 @@ variable "lambda_backup_role_name" {
 variable "event_bitcoin_arn" {
   type = string
 }
+variable "s3_stream_bitcoin_bucket_name" {
+  type = string
+}

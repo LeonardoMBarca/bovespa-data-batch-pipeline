@@ -58,7 +58,7 @@ variable "bitcoin_backup_name" {
 }
 
 variable "create_new_firehose_role" {
-  type = string
+  type = bool
 }
 
 variable "firehose_bucket_arn" {

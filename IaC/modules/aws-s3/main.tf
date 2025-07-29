@@ -20,9 +20,10 @@ resource "aws_s3_bucket" "s3_stream_bitcoin_bucket" {
 }
 
 resource "aws_s3_bucket" "backup_bitcoin_bucket_name" {
-  bucket        = "bitcoin-streaming-data-${var.account_id}"
+  bucket        = "backup-bitcoin-streaming-data-${var.account_id}"
   force_destroy = true
 }
+
 resource "aws_s3_bucket_lifecycle_configuration" "glacier_backup_config" {
   bucket = aws_s3_bucket.backup_bitcoin_bucket_name.id
 

@@ -25,6 +25,7 @@ module "lambda" {
   ecr_image_name                         = var.ecr_image_name
   ecr_image_tag                          = var.ecr_image_tag
   s3_backup_bitcoin_bucket_name          = module.s3.backup_bitcoin_bucket_name
+  s3_stream_bitcoin_bucket_name          = module.s3.s3_stream_bitcoin_bucket_name
   ecr_image_name_bitcoin                 = var.ecr_image_name_bitcoin
   event_bitcoin_arn                      = module.cloudwatch.event_bitcoin_arn
   create_new_role_lambda_backup          = var.create_new_role_lambda_bitcoin_backup
@@ -90,7 +91,7 @@ module "kinesis" {
   source = "./modules/aws-kinesis"
 
   account_id               = data.aws_caller_identity.current.account_id
-  stream_bucket_arn        = module.s3.backup_bitcoin_bucket_arn
+  stream_bucket_arn        = module.s3.s3_stream_bitcoin_bucket_arn
   create_new_firehose_role = var.create_new_firehose_role
   firehose_role            = module.iam.firehose_role
   role_firehose            = var.role_firehose
