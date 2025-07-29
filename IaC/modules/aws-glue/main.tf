@@ -1,7 +1,7 @@
 resource "aws_glue_job" "glue_bovespa_processing" {
   count = var.create_new_glue_job ? 1 : 0
 
-  name              = "glue-bovespa-data-processing"
+  name              = "glue-bovespa-processing"
   role_arn          = "arn:aws:iam::${var.account_id}:role/${var.create_new_role_glue_job == true ? var.glue_job_role_name : var.name_glue_job_role}"
   glue_version      = "5.0"
   max_retries       = 0
