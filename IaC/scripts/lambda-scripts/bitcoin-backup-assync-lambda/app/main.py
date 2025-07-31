@@ -1,29 +1,28 @@
 import boto3
 import os
-import json
-import urllib.parse
 
-s3 = boto3.client('s3')
+QUERUE_URL = os.environ["QUEUE_URL"]
+sqs = boto3.client("sqs")
 
-DEST_BUCKET = os.environ.get("BACKUP_BUCKET_NAME")
+def handler(event, context):
+    messages = []
 
-def handler(event):
-    for record in event['Records']:
-        try:
-            body = json.loads(record['body'])
-            source_bucket = body['source_bucket']
-            key = urllib.parse.unquote_plus(body['object_key'])
+    while True:
+        response = sqs.receive_message(
+            QueueUrl = QUERUE_URL,
+            MaxNumberOfMessages=10,
+            WaitTimeSeconds=0
+        )
 
-            print(f"Copiando {key} de {source_bucket} para {DEST_BUCKET}")
+        if "Message" not in response:
+            break
 
-            # Caminho temporário para download
-            download_path = f"/tmp/{os.path.basename(key)}"
+        for msg in response["Messages"]:
+            messages.append(msg["Body"])
 
-            s3.download_file(source_bucket, key, download_path)
+            sqs.delete_message(
+                QueueUrl=QUERUE_URL,
+                ReceiptHandle=msg["ReceiptHandle"]
+            )
 
-            s3.upload_file(download_path, DEST_BUCKET, key)
-
-            print(f"Arquivo {key} copiado com sucesso para {DEST_BUCKET}")
-
-        except Exception as e:
-            print(f"Erro ao processar mensagem: {e}")
+    print(f"{len(messages)} messagens processeds")
