@@ -18,7 +18,7 @@ Antes de começar, certifique-se de ter instalado:
 ## 🚀 Passo a Passo Completo
 
 ### Passo 1: Configurar Credenciais AWS
-
+#### Opção 1
 ```bash
 # Edite o arquivo de credenciais AWS
 nano ~/.aws/credentials
@@ -30,14 +30,48 @@ aws_secret_access_key = SUA_SECRET
 aws_session_token = SEU_TOKEN   # caso temporário
 ```
 
-### Passo 2: Criar Bucket S3 para o Terraform State
-
+#### Opção 2
 ```bash
-# Crie um bucket S3 para armazenar o estado do Terraform
-aws s3 mb s3://NOME-DO-SEU-BUCKET-TERRAFORM-STATE --region us-east-1
+# Exporte suas credenciais AWS para o terminal
+export AWS_ACCESS_KEY_ID="SUA_KEY"
+export AWS_SECRET_ACCESS_KEY="SUA_SECRET_KEY"
+export AWS_SESSION_TOKEN="SEU_TOKEN" # caso temporário
 ```
 
-### Passo 3: Configurar o Backend do Terraform
+### Passo 2: Configurar todas as variáveis de ambiente
+```bash
+# Cole no terminal preenchendo com suas informações
+# Variáveis para o ECR
+export AWS_REGION="us-east-1" # Altere conforme sua região
+export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+export LAMBDA_REPO_BITCOIN="lambda-bitcoin-libs" # Nome do repo ECR a ser criado
+export FUNCAO_LAMBDA_BITCOIN="bitcoin-backup-assync" # Nome da função lambda que será criada
+export LAMBDA_REPO_BOVESPA="lambda-libs" # Nome do repo ECR a ser criado
+export FUNCAO_LAMBDA_BOVESPA="daily-lambda-bovespa" # Nome da fição lambda que será criada
+
+# Variáveis para o terraform
+export TF_VAR_create_new_role_daily_lambda_bovespa=
+export TF_VAR_name_role_daily_lambda_bovespa=
+export TF_VAR_create_new_role_lambda_glue_activation=
+export TF_VAR_name_role_lambda_glue_activation=
+export TF_VAR_create_new_glue_job=false
+export TF_VAR_name_glue_job=
+export TF_VAR_create_new_role_glue_job=
+export TF_VAR_name_glue_job_role=
+export TF_VAR_create_new_ec2_profile_role=
+export TF_VAR_instance_profile_role_name=
+export TF_VAR_create_new_firehose_role=
+export TF_VAR_create_new_role_lambda_bitcoin_backup=
+export TF_VAR_role_firehose=
+export TF_VAR_role_lambda_backup_name=
+```
+As variáveis com informações já preenchidas acima (exceto AWS_REGION) estão com os valores definidos para serem compatíveis com o código, caso seja necessário altera-las, deve ser feito a alteração também das variáveis do .tfvars (LAMBDA_REPO_BITCOIN e LAMBDA_REPO_BOVESPA) E/OU DO NOME DOS LAMBDAS NO main.tf (FUNCAO_LAMBDA_BITCOIN e FUNCAO_LAMBDA_BOVESPA)
+
+### Passo 3: Criar Bucket S3 para o Terraform State
+
+É necessário criar um Bucket no S3 manualmente para armazenar o Terraform State, coloque o nome do bucket de `terraform-state-bucket-bovespa-{SEU-ACCOUNT-ID}`.
+
+### Passo 4: Configurar o Backend do Terraform
 
 ```bash
 # Edite o arquivo version.tf com o nome do bucket criado
@@ -45,34 +79,20 @@ nano IaC/version.tf
 
 # Modifique a seção backend para:
 backend "s3" {
-  bucket = "NOME-DO-SEU-BUCKET-TERRAFORM-STATE"
+  bucket = "terraform-state-bucket-bovespa-SEU-ACCOUNT-ID" # Substituindo por seu account ID
   key    = "infra/tfstate_file.tfstate"
   region = "us-east-1"
 }
 ```
 
-### Passo 4: Criar Repositório ECR para a Lambda
+### Passo 5: Criar Repositório ECR para os Lambdas e Enviar as Imagens Docker para o ECR
 
 ```bash
-# Defina variáveis para facilitar os comandos
-export AWS_REGION=us-east-1  # Substitua pela sua região
-export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-export LAMBDA_REPO=bovespa-daily-lambda  # Nome do repositório ECR
+# Vá para a pasta do lambda 1
+cd IaC/scripts/lambda-scripts/daily-lambda-bovespa
 
 # Crie o repositório ECR
 aws ecr create-repository --repository-name $LAMBDA_REPO --region $AWS_REGION
-```
-
-### Passo 5: Construir e Enviar a Imagem Docker para o ECR
-
-```bash
-# Navegue até o diretório da Lambda
-cd IaC/scripts/lambda-scripts/daily-lambda-bovespa
-
-# Crie um arquivo .env com as variáveis necessárias
-echo "AWS_REGION=$AWS_REGION" > .env
-echo "AWS_ACCOUNT_ID=$AWS_ACCOUNT_ID" >> .env
-echo "LAMBDA_REPO=$LAMBDA_REPO" >> .env
 
 # Faça login no ECR
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
@@ -88,36 +108,14 @@ docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$LAMBDA_REPO:lates
 
 # Volte para o diretório raiz do projeto
 cd ../../../../
+
+# Vá para a pasta do outro lambda para subir o outro container
+cd IaC/scripts/lambda-scripts/bitcoin-backup-assync-lambda
+
+# Execute os mesmos comandos do lambda anterior
 ```
 
-### Passo 6: Configurar Variáveis de Ambiente para o Terraform
-
-```bash
-# Configure as variáveis de ambiente necessárias para o Terraform
-export TF_VAR_create_new_role_daily_lambda_bovespa="false"
-export TF_VAR_name_role_daily_lambda_bovespa="LabRole"
-export TF_VAR_create_new_role_lambda_glue_activation="false"
-export TF_VAR_name_role_lambda_glue_activation="LabRole"
-export TF_VAR_create_new_glue_job="false"
-export TF_VAR_name_glue_job="glue-bovespa-processing"
-export TF_VAR_create_new_role_glue_job="false"
-export TF_VAR_name_glue_job_role="LabRole"
-export TF_VAR_create_new_ec2_profile_role=false
-export TF_VAR_create_new_firehose_role=false
-export TF_VAR_create_new_role_lambda_bitcoin_backup=false
-export TF_VAR_instance_profile_role_name="LabRole"
-export TF_VAR_role_firehose="LabRole"
-export TF_VAR_role_lambda_backup_name="LabRole"
-```
-
-### Passo 7: Configurar Variáveis do Terraform (Opcional)
-
-```bash
-# Edite o arquivo terraform.tfvars se necessário
-nano IaC/terraform.tfvars
-```
-
-### Passo 8: Inicializar e Aplicar o Terraform
+### Passo 6: Inicializar e Aplicar o Terraform
 
 ```bash
 # Navegue até o diretório IaC
@@ -135,72 +133,17 @@ terraform apply
 
 Confirme digitando `yes` quando solicitado.
 
-### Passo 9: Atualizar a Lambda (Para Futuras Modificações)
+### Passo 7: Atualizar Código da Lambda no ECR
 
-Após fazer alterações no código da Lambda, você pode atualizar a imagem e reimplantar:
-
-```bash
-# Navegue até o diretório da Lambda
-cd IaC/scripts/lambda-scripts/daily-lambda-bovespa
-
-# Certifique-se de que o arquivo .env está configurado corretamente
-cat .env
-
-# Execute o comando de deploy via Makefile
-make deploy
-```
-
-## 📁 Estrutura do Projeto
-
-```bash
-IaC/
-├── modules/
-│ ├── s3/           # Buckets S3 (state, datalake, scripts)
-│ ├── lambda/       # Funções Lambda (coleta e trigger)
-│ ├── glue/         # Job de processamento Glue
-│ ├── iam/          # Roles e políticas IAM
-│ └── cloudwatch/   # Agendamento de eventos
-├── scripts/
-│ ├── glue-script/  # Scripts para o Glue Job
-│ └── lambda-scripts/
-│     └── daily-lambda-bovespa/  # Lambda para coleta de dados
-├── main.tf         # Orquestração dos módulos
-├── variables.tf    # Variáveis globais
-└── version.tf      # Backend e providers
-```
-
-## 🧠 Fluxo da Solução
-
-```mermaid
-graph TD
-    A[CloudWatch Event] --> B[Lambda Daily]
-    B --> C[S3 Raw Data]
-    C --> D[Lambda Glue Trigger]
-    D --> E[Glue Job]
-    E --> F[Processed Data]
-```
-
-## 🔄 Manutenção e Atualizações
-
-### Atualizar Código da Lambda
-
-1. Modifique os arquivos em `IaC/scripts/lambda-scripts/daily-lambda-bovespa/app/`
+1. Modifique os arquivos em `IaC/scripts/lambda-scripts/daily-lambda-bovespa/app/` ou `IaC/scripts/lambda-scripts/bitcoin-backup-assync-lambda`
 2. Execute o processo de atualização:
 
 ```bash
 cd IaC/scripts/lambda-scripts/daily-lambda-bovespa
+# ou
+cd IaC/scripts/lambda-scripts/bitcoin-backup-assync-lambda
+
 make deploy
-```
-
-### Modificar Infraestrutura
-
-1. Edite os arquivos Terraform conforme necessário
-2. Execute:
-
-```bash
-cd IaC
-terraform plan
-terraform apply
 ```
 
 ## 📚 Links Úteis
