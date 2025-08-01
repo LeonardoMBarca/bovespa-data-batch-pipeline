@@ -92,19 +92,19 @@ backend "s3" {
 cd IaC/scripts/lambda-scripts/daily-lambda-bovespa
 
 # Crie o repositório ECR
-aws ecr create-repository --repository-name $LAMBDA_REPO --region $AWS_REGION
+aws ecr create-repository --repository-name $LAMBDA_REPO_BOVESPA --region $AWS_REGION
 
 # Faça login no ECR
 aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
 
 # Construa a imagem Docker
-docker build -t $LAMBDA_REPO .
+docker build -t $LAMBDA_REPO_BOVESPA .
 
 # Crie a tag para o ECR
-docker tag $LAMBDA_REPO:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$LAMBDA_REPO:latest
+docker tag $LAMBDA_REPO_BOVESPA:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$LAMBDA_REPO_BOVESPA:latest
 
 # Envie a imagem para o ECR
-docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$LAMBDA_REPO:latest
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$LAMBDA_REPO_BOVESPA:latest
 
 # Volte para o diretório raiz do projeto
 cd ../../../../
@@ -112,7 +112,20 @@ cd ../../../../
 # Vá para a pasta do outro lambda para subir o outro container
 cd IaC/scripts/lambda-scripts/bitcoin-backup-assync-lambda
 
-# Execute os mesmos comandos do lambda anterior
+# Crie o repositório ECR
+aws ecr create-repository --repository-name $LAMBDA_REPO_BITCOIN --region $AWS_REGION
+
+# Faça login no ECR
+aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+# Construa a imagem Docker
+docker build -t $LAMBDA_REPO_BOVESPA .
+
+# Crie a tag para o ECR
+docker tag $LAMBDA_REPO_BITCOIN:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$LAMBDA_REPO_BITCOIN:latest
+
+# Envie a imagem para o ECR
+docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$LAMBDA_REPO_BITCOIN:latest
 ```
 
 ### Passo 6: Inicializar e Aplicar o Terraform
@@ -133,7 +146,7 @@ terraform apply
 
 Confirme digitando `yes` quando solicitado.
 
-### Passo 7: Atualizar Código da Lambda no ECR
+### Passo 7: Atualizar Código da Lambda no ECR (Opcional)
 
 1. Modifique os arquivos em `IaC/scripts/lambda-scripts/daily-lambda-bovespa/app/` ou `IaC/scripts/lambda-scripts/bitcoin-backup-assync-lambda`
 2. Execute o processo de atualização:
@@ -145,6 +158,19 @@ cd IaC/scripts/lambda-scripts/bitcoin-backup-assync-lambda
 
 make deploy
 ```
+
+### Passo 8: Acessar a Instância do EC2 (Opcional)
+```bash
+# Criar par de chaves na AWS
+aws ec2 create-key-pair --key-name chave-ec2-stream --query 'KeyMaterial' --output text > ~/.ssh/chave-ec2-stream.pem
+
+# Definir permissões corretas
+chmod 400 ~/.ssh/chave-ec2-stream.pem
+
+# Conectar à instância EC2
+ssh -i ~/.ssh/chave-ec2-stream.pem ec2-user@IP_PUBLICO_DA_INSTÂNCIA
+```
+Obs: O IP público da instância aparece no final do resultao do comando `terraform apply` e também pode ser pego pelo console.
 
 ## 📚 Links Úteis
 
