@@ -1,7 +1,3 @@
-# Variáveis de ambiente
-include .env
-export
-
 REGIAO ?= $(AWS_REGION)
 CONTA ?= $(AWS_ACCOUNT_ID)
 REPOSITORIO ?= $(LAMBDA_REPO_BITCOIN)

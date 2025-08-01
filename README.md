@@ -127,6 +127,7 @@ docker tag $LAMBDA_REPO_BITCOIN:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazo
 # Envie a imagem para o ECR
 docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$LAMBDA_REPO_BITCOIN:latest
 ```
+Caso ocorra um erro em alguma etapa, tente exportar as variáveis de ambiente e credenciais novamente.
 
 ### Passo 6: Inicializar e Aplicar o Terraform
 
@@ -158,6 +159,8 @@ cd IaC/scripts/lambda-scripts/bitcoin-backup-assync-lambda
 
 make deploy
 ```
+Caso ocorra um erro, tente exportar as variáveis de ambiente e credenciais novamente.
+
 
 ### Passo 8: Acessar a Instância do EC2 (Opcional)
 ```bash
