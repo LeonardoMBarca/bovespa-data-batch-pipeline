@@ -284,9 +284,19 @@ resource "aws_iam_role_policy" "lambda_bitcoin_backup_policy" {
           "s3:ListBucket"
         ]
         Resource = [
-          "arn:aws:s3:::${var.bitcoin_backup_name}",
-          "arn:aws:s3:::${var.bitcoin_backup_name}/*"
+          "arn:aws:s3:::*",
+          "arn:aws:s3:::*/*"
         ]
+      },
+      {
+        Sid    = "AllowSQSAccess"
+        Effect = "Allow"
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        Resource = "*"
       }
     ]
   })

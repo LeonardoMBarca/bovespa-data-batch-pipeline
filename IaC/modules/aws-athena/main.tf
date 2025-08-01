@@ -22,3 +22,23 @@ resource "aws_athena_named_query" "daily_consul" {
   description = "Query to fetch daily Bovespa data"
   workgroup   = aws_athena_workgroup.default.name
 }
+
+resource "aws_athena_named_query" "bitcoin_query" {
+  name        = "BitcoinDataQuery"
+  database    = var.database_name
+  query       = <<EOF
+  SELECT 
+    pair,
+    last as price,
+    volume24h,
+    var24h,
+    time,
+    timestamp_utc,
+    type
+  FROM bitcoin_ticker
+  WHERE type = 'ticker_data'
+  ORDER BY timestamp_utc DESC
+  EOF
+  description = "Query to fetch Bitcoin ticker data"
+  workgroup   = aws_athena_workgroup.default.name
+}

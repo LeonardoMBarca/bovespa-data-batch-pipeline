@@ -5,7 +5,7 @@ export
 REGIAO ?= $(AWS_REGION)
 CONTA ?= $(AWS_ACCOUNT_ID)
 REPOSITORIO ?= $(LAMBDA_REPO)
-LAMBDA_FUNCTION ?= $(FUNCAO_LAMBDA)
+LAMBDA_FUNCTION ?= bitcoin-backup-assync
 TAG ?= latest
 IMAGEM_URI := $(CONTA).dkr.ecr.$(REGIAO).amazonaws.com/$(REPOSITORIO):$(TAG)
 

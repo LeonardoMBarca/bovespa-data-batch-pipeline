@@ -29,3 +29,9 @@ output "backup_bitcoin_bucket_name" {
 output "backup_bitcoin_bucket_arn" {
   value = aws_s3_bucket.backup_bitcoin_bucket_name.arn
 }
+output "s3_stream_bitcoin_bucket_name" {
+  value = aws_s3_bucket.s3_stream_bitcoin_bucket.bucket
+}
+output "s3_stream_bitcoin_bucket_arn" {
+  value = aws_s3_bucket.s3_stream_bitcoin_bucket.arn
+}

@@ -69,12 +69,15 @@ resource "aws_lambda_function" "lambda_backup_bitcoin" {
   image_uri    = "${var.account_id}.dkr.ecr.us-east-1.amazonaws.com/${var.ecr_image_name_bitcoin}:${var.ecr_image_tag}"
 
   role        = "arn:aws:iam::${var.account_id}:role/${var.create_new_role_lambda_backup == true ? var.lambda_backup_role_name : var.role_lambda_backup_name}"
-  memory_size = 512
-  timeout     = 30
+  memory_size = 1024
+  timeout     = 900
+  reserved_concurrent_executions = 10
 
   environment {
     variables = {
-      BUCKET_NAME = var.s3_backup_bitcoin_bucket_name
+      SOURCE_BUCKET_NAME = var.s3_stream_bitcoin_bucket_name
+      BACKUP_BUCKET_NAME = var.s3_backup_bitcoin_bucket_name
+      SQS_QUEUE_URL = aws_sqs_queue.bitcoin_queue_stream.url
     }
   }
 }
@@ -104,7 +107,7 @@ resource "aws_sqs_queue_policy" "default" {
         Resource  = aws_sqs_queue.bitcoin_queue_stream.arn
         Condition = {
           ArnLike = {
-            "aws:SourceArn" = "arn:aws:s3:::${var.s3_backup_bitcoin_bucket_name}"
+            "aws:SourceArn" = "arn:aws:s3:::${var.s3_stream_bitcoin_bucket_name}"
           }
         }
       }
@@ -113,13 +116,12 @@ resource "aws_sqs_queue_policy" "default" {
 }
 
 resource "aws_s3_bucket_notification" "s3_trigger_sqs_bitcoin" {
-  bucket = var.s3_backup_bitcoin_bucket_name
+  bucket = var.s3_stream_bitcoin_bucket_name
 
   queue {
     queue_arn     = aws_sqs_queue.bitcoin_queue_stream.arn
     events        = ["s3:ObjectCreated:*"]
-    filter_prefix = "data/"
-    # filter_suffix = ".parquet"
+    filter_prefix = "bitcoin-data/"
   }
   depends_on = [aws_sqs_queue_policy.default]
 }
