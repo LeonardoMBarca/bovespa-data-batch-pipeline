@@ -4,7 +4,7 @@ Pipeline de dados em lote para coleta e processamento de dados da Bovespa usando
 
 ## 🏗️ Arquitetura
 
-![Arquitetura do Pipeline](assets/FIAP-Tech-Challenge-2.drawio%20(2).svg)
+![Arquitetura do Pipeline](assets/aqt.svg)
 
 ## 📋 Guia de Instalação e Execução (Passo a Passo)
 
