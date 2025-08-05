@@ -2,6 +2,10 @@
 
 Pipeline de dados em lote para coleta e processamento de dados da Bovespa usando AWS (Lambda, Glue, S3 e CloudWatch).
 
+## 🏗️ Arquitetura
+
+![Arquitetura do Pipeline](assets/FIAP-Tech-Challenge-2.drawio%20(2).svg)
+
 ## 📋 Guia de Instalação e Execução (Passo a Passo)
 
 Este guia apresenta a sequência **EXATA** de passos para configurar e executar o pipeline de dados da Bovespa.
