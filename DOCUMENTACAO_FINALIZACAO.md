@@ -6,7 +6,7 @@ Este projeto foi desenvolvido como solução para o Tech Challenge da FIAP, impl
 
 ## 🏗️ Arquitetura da Solução
 
-![Arquitetura do Pipeline](assets/image.png)
+![Arquitetura do Pipeline](assets/aqt.png)
 
 A arquitetura implementada segue as melhores práticas de engenharia de dados na AWS, utilizando serviços gerenciados para garantir escalabilidade, confiabilidade e eficiência operacional.
 
